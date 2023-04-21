@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Anna-Sofia Ageenko">
+    <title>Online Color Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body, .wrapper {
+            height: 100%;
+            width: 100%;
+        }
+        .rgb, .cmy, .hsv {
+            padding-right: 40px;
+        }
+        form {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+        input {
+            display: block;
+        }
+        h2 {
+            font: 3rem fantasy;
+        }
+    </style>
+</head>
+<body>
+<h1 align="center">Online Color Converter</h1>
+<div class="wrapper">
+  <form action="">
+    <div class="rgb">
+        <h2>RGB</h2>
+        <label for="in_R"><b>R</b>ed</label><input type="number" name="R" id="in_R" value="0" step="5" min="0" max="255" onchange="fromRGB(this.value)">
+        <label for="in_G"><b>G</b>reen</label><input type="number" name="G" id="in_G" value="0" step="5" min='0' max="255" onchange="fromRGB(this.value)">
+        <label for="in_B"><b>B</b>lue</label><input type="number" name="B" id="in_B" value="0" step="5" min='0' max="255" onchange="fromRGB(this.value)">
+            <!--<input type="button" value="Отправить" id='submitRGB'>-->
+    </div>
+
+    <div class="cmy">
+        <h2>CMY</h2>
+        <label for="in_C"><b>C</b>yan</label><input type="number" name="C" id="in_C" value="0" step="5" min="0" max="255" onchange="fromCMY(this.value)">
+        <label for="in_M"><b>M</b>agenta</label><input type="number" name="M" id="in_M" value="0" step="5" min="0" max="255" onchange="fromCMY(this.value)">
+        <label for="in_Y"><b>Y</b>ellow</label><input type="number" name="Y" id="in_Y" value="0" step="5" min="0" max="255" onchange="fromCMY(this.value)">
+            <!--<input type="button"  value="Отправить" id='submitCMY'>-->
+    </div>
+
+    <div class="hsv">
+        <h2>HSV</h2>
+        <label for="in_H"><b>H</b>ue</label><input type="number" name="H" id="in_H" value="0" step="5" min="0" max="360" onchange="fromHSV(this.value)">
+        <label for="in_S"><b>S</b>aturation</label><input type="number" name="S" id="in_S" value="0" step="5" min="0" max="100"onchange="fromHSV(this.value)">
+        <label for="in_V"><b>V</b>alue</label><input type="number" name="V" id="in_V" value="0" step="5" min="0" max="100" onchange="fromHSV(this.value)">
+            <!--<input type="button" value="Отправить" id='submitHSV'>-->
+    </div>
+    <input type="color" id="head" name="head" value="#e66465" onchange="fromHEX(this.value)">
+  </form>
+
+</div>
+
+<script>
+    let in_R = document.getElementById("in_R");
+    let in_G = document.getElementById("in_G");
+    let in_B = document.getElementById("in_B");
+
+    let in_C = document.getElementById("in_C");
+    let in_M = document.getElementById("in_M");
+    let in_Y = document.getElementById("in_Y");
+
+    let in_H = document.getElementById("in_H");
+    let in_S = document.getElementById("in_S");
+    let in_V = document.getElementById("in_V");
+
+//преобразования
+//RGB - HSV__________________________________________________
+    function RGBtoHSV(R, G, B) {
+        let absR = R / 255;
+        let absG = G / 255;
+        let absB = B / 255;
+
+        let max = Math.max(absR, absG, absB);
+        let min = Math.min(absR, absG, absB);
+        let difference = max - min;
+
+        let H = 0;
+
+        if (isNaN(H) === true || difference === 0) {
+            H = 0;
+        }
+
+        else if (max === absR) {
+            H = 60 * ((absG - absB) / difference);
+        }
+
+        else if (max == absG) {
+            H = 60 * ((absB - absR) / difference + 2);
+        }
+
+        else if (max === absB) {
+            H = 60 * ((absR - absG) / difference  + 4);
+        }
+
+        if (H < 0) {
+            H += 360;
+        }
+
+        let S = (max === 0) ? 0 : Math.round((difference / max) * 100);
+        let V = Math.round(max * 100);
+
+        return [Math.round(H), S, V];
+
+    }
+
+    function HSVtoRGB(h, s, v) {
+        h /= 360;
+        s /= 100;
+        v /= 100;
+        let r, g, b;
+
+        let i = Math.floor(h * 6);
+        let f = h * 6 - i;
+        let p = v * (1 -    s);
+        let q = v * (1 - f * s);
+        let t = v * (1 - (1 - f) * s);
+
+        switch (i % 6) {
+            case 0: r = v, g = t, b = p; break;
+            case 1: r = q, g = v, b = p; break;
+            case 2: r = p, g = v, b = t; break;
+            case 3: r = p, g = q, b = v; break;
+            case 4: r = t, g = p, b = v; break;
+            case 5: r = v, g = p, b = q; break;
+        }
+        return [ Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+
+//RGB - CMY___________________________________________________________________________
+    function RGBtoCMY(R, G, B) {
+        let C = (255 - R)
+        let M = (255 - G)
+        let Y = (255 - B)
+        return [C, M, Y];
+    }
+
+    function CMYtoRGB(C, M, Y) {
+        return [255 - C, 255 - M, 255 - Y];
+    }    
+
+//Hex_________________________________________________________________________________
+    function componentToHex(c) {
+        let hex = c.toString(16);
+        return hex.length === 1 ? "0" + hex.toString() : hex.toString();
+    }
+
+    function componentFromHex(c) {
+        console.log(c);
+        return parseInt(c, 16);
+    }
+//Hex, RGB
+    function HexToRGB(hex) {
+        hex += "m";
+        return [componentFromHex(hex.slice(1, 3)), componentFromHex(hex.slice(3, 5)), componentFromHex(hex.slice(5, 7))]
+    }
+
+    function RGBtoHex(R, G, B) {
+        return "#" + componentToHex(R) + componentToHex(G) + componentToHex(B);
+    }
+
+
+//backgroundColor_______________________________________________________________________________
+    function fromRGB() {
+        let R = parseInt(in_R.value);
+        let B = parseInt(in_B.value);
+        let G = parseInt(in_G.value);
+
+        if (checkRGB(R, G, B) == false) {
+            return null;
+        }
+
+        [in_C.value, in_M.value, in_Y.value] = RGBtoCMY(R, G, B);
+        [in_H.value, in_S.value, in_V.value] = RGBtoHSV(R, G, B);
+
+        let wrapper = document.querySelector(".wrapper");
+        wrapper.style.backgroundColor = RGBtoHex(R, G, B);
+
+        let clr = document.querySelector("h1");
+        clr.style.color = RGBtoHex(R, G, B);
+    }
+
+    function fromCMY() {
+        let C = parseInt(in_C.value);
+        let M = parseInt(in_M.value);
+        let Y = parseInt(in_Y.value);
+
+        if (checkCMY(C, M, Y) == false) {
+            return null;
+        }
+
+        [in_R.value, in_G.value, in_B.value] = CMYtoRGB(C, M, Y);
+        [in_H.value, in_S.value, in_V.value] = RGBtoHSV(in_R.value, in_G.value, in_B.value);
+
+        let wrapper = document.querySelector(".wrapper");
+        wrapper.style.backgroundColor = RGBtoHex(parseInt(in_R.value), parseInt(in_G.value), parseInt(in_B.value));
+
+        let clr = document.querySelector("h1");
+        clr.style.color = RGBtoHex(parseInt(in_R.value), parseInt(in_G.value), parseInt(in_B.value));
+    }
+
+    function fromHSV() {
+        let H = parseInt(in_H.value);
+        let S = parseInt(in_S.value);
+        let V = parseInt(in_V.value);
+
+        if (checkHSV(H, S, V) == false) {
+            return null;
+        }
+
+        [in_R.value, in_G.value, in_B.value] = HSVtoRGB(H, S, V);
+        [in_C.value, in_M.value, in_Y.value] = RGBtoCMY(in_R.value, in_G.value, in_B.value);
+
+        let wrapper = document.querySelector(".wrapper");
+        wrapper.style.backgroundColor = RGBtoHex(parseInt(in_R.value), parseInt(in_G.value), parseInt(in_B.value));
+
+        let clr = document.querySelector("h1");
+        clr.style.color = RGBtoHex(parseInt(in_R.value), parseInt(in_G.value), parseInt(in_B.value));
+    }
+
+    function fromHEX(value) {
+        let [R, G, B] = HexToRGB(value);
+
+        if (checkRGB(R, G, B) == false) {
+            return null;
+        }
+
+        [in_R.value, in_G.value, in_B.value] = [R, G, B];
+        [in_C.value, in_M.value, in_Y.value] = RGBtoCMY(    R, G, B);
+        [in_H.value, in_S.value, in_V.value] = RGBtoHSV(R, G, B);
+
+        let wrapper = document.querySelector(".wrapper");
+        wrapper.style.backgroundColor = RGBtoHex(R, G, B);
+
+        let clr = document.querySelector("h1");
+        clr.style.color = RGBtoHex(R, G, B);
+    }
+
+
+//проверка________________________________________________________________________________________________________
+    function checkRGB(R, G, B) {
+        return (!(R > 255 || G > 255 || B > 255 || R < 0 || G < 0 || B < 0));
+    }
+
+    function checkHSV(H, S, V) {
+        return (!(H > 360 || H < 0 || S > 100 || S < 0 || V > 100 || V < 0));
+    }
+
+    function checkCMY(C, M, Y) {
+        return (!(C > 255 || M > 255 || Y > 255 || C < 0 || M < 0 || Y < 0));
+    }
+
+/*
+//ручной ввод значений ("отправить") тут висят слушатели________________________________________________________________________________
+    let submitRGB = document.getElementById('submitRGB');
+    submitRGB.addEventListener('click', fromRGB, false);
+
+    let submitCMY = document.getElementById('submitCMY')
+    submitCMY.addEventListener('click', fromCMY, false);
+
+    let submitHSV = document.getElementById("submitHSV");
+    submitHSV.addEventListener('click', fromHSV, false);
+//______________________________________________________________________________________________________________________________________
+*/
+/*
+
+    R.addEventListener('change', fromRGB, false);
+    G.addEventListener('change', fromRGB, false);
+    B.addEventListener('change', fromRGB, false);
+
+    C.addEventListener('change', fromCMY, false);
+    M.addEventListener('change', fromCMY, false);
+    Y.addEventListener('change', fromCMY, false);
+
+    H.addEventListener('change', fromHSV, false);
+    S.addEventListener('change', fromHSV, false);
+    V.addEventListener('change', fromHSV, false);
+*/
+/*
+<input placeholder="Enter some text" name="name"/>
+<p id="log"></p>
+*/
+/*
+const input = document.querySelector('input');
+const log = document.getElementById('log');
+
+input.addEventListener('change', updateValue);
+
+function updateValue(e) {
+  log.textContent = e.target.value;
+}
+*/
+</script>
+</body>
+</html>
